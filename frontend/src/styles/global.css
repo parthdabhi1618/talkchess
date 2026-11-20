@@ -1,0 +1,53 @@
+:root {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #242424;
+  --bg-panel: #1e1e1e;
+  --bg-card: #2d2d2d;
+  --border: #3a3a3a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #9a9a9a;
+  --text-muted: #666;
+  --accent: #4a9eff;
+  --accent-hover: #6ab3ff;
+  --green: #4caf50;
+  --red: #f44336;
+  --yellow: #ff9800;
+  --board-idle-border: #3a3a3a;
+  --board-llm-border: #4a9eff;
+  --board-sandbox-border: #9c27b0;
+  --scrollbar: #3a3a3a;
+  --scrollbar-thumb: #555;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+button {
+  cursor: pointer;
+  border: none;
+  background: var(--accent);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+button:hover { background: var(--accent-hover); }
+button:disabled { background: #444; cursor: not-allowed; }
+
+input, textarea {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+input:focus, textarea:focus { border-color: var(--accent); }

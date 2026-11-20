@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String        @unique
+  passwordHash String
+  displayPrefs String        @default("{}") // JSON string
+  panelPrefs   String        @default("{}") // JSON string
+  createdAt    DateTime      @default(now())
+  games        Game[]
+  sessions     Session[]
+  stats        UserStats?
+}
+
+model Game {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  moves     String        @default("[]")  // JSON array of SAN moves
+  fens      String        @default("[]")  // JSON array of FENs per move
+  evals     String        @default("[]")  // JSON array of eval numbers
+  pvPerMove String        @default("[]")  // JSON array of PV lines
+  result    String?       // "1-0" | "0-1" | "1/2-1/2" | null
+  status    String        @default("active") // "active" | "finished"
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  sessions  Session[]
+  messages  ChatMessage[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  gameId       String
+  game         Game     @relation(fields: [gameId], references: [id])
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  leftPanel    String   @default("eval")    // panel type
+  rightPanel   String   @default("chat")    // panel type
+  boardState   String   @default("live")    // "live" | "sandbox" | "idle"
+  sandboxFen   String?
+  permScope    String   @default("readonly") // "readonly" | "move"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  sessionId  String
+  gameId     String
+  game       Game     @relation(fields: [gameId], references: [id])
+  moveIndex  Int      @default(-1)
+  role       String   // "user" | "assistant" | "tool"
+  content    String
+  toolCalls  String   @default("[]") // JSON
+  createdAt  DateTime @default(now())
+}
+
+model UserStats {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  mistakeTags  String   @default("{}") // JSON map of tag -> count
+  blunders     Int      @default(0)
+  mistakes     Int      @default(0)
+  inaccuracies Int      @default(0)
+  goodMoves    Int      @default(0)
+  bestMoves    Int      @default(0)
+  updatedAt    DateTime @updatedAt
+}
