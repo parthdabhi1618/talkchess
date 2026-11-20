@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { DEMO_MODE } from '../config';
 
 interface GameSummary {
   id: string;
@@ -42,7 +43,7 @@ export default function HistoryPage() {
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <span style={{ color: '#9a9a9a', fontSize: '14px' }}>@{user?.username}</span>
           <button onClick={() => navigate('/profile')} style={{ background: '#2d2d2d', fontSize: '13px', padding: '6px 12px' }}>Profile</button>
-          <button onClick={logout} style={{ background: '#2d2d2d', fontSize: '13px', padding: '6px 12px' }}>Sign Out</button>
+          {!DEMO_MODE && <button onClick={logout} style={{ background: '#2d2d2d', fontSize: '13px', padding: '6px 12px' }}>Sign Out</button>}
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useGame } from '../contexts/GameContext';
+import { DEMO_MODE } from '../config';
 
 export default function TopBar() {
   const { logout, user } = useAuth();
@@ -27,8 +28,9 @@ export default function TopBar() {
         {connected ? '● Coach Connected' : '○ Coach Disconnected'}
       </span>
       <span style={{ fontSize: '13px', color: '#9a9a9a' }}>@{user?.username}</span>
+      {DEMO_MODE && <span style={{ fontSize: '11px', color: '#ffb74d', border: '1px solid #ffb74d', borderRadius: '4px', padding: '1px 6px' }}>Demo</span>}
       <button onClick={() => navigate('/history')} style={{ background: '#2d2d2d', fontSize: '12px', padding: '4px 10px' }}>Games</button>
-      <button onClick={logout} style={{ background: '#2d2d2d', fontSize: '12px', padding: '4px 10px' }}>Sign Out</button>
+      {!DEMO_MODE && <button onClick={logout} style={{ background: '#2d2d2d', fontSize: '12px', padding: '4px 10px' }}>Sign Out</button>}
     </div>
   );
 }

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { DEMO_MODE } from '../config';
 
 const API = '';
 
@@ -9,6 +10,8 @@ interface AuthContextType {
   register: (username: string, password: string) => Promise<void>;
   logout: () => void;
   token: string | null;
+  ready: boolean;
+  isDemo: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -19,6 +22,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return stored ? JSON.parse(stored) : null;
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('tc_token'));
+  // In demo mode auth is resolved asynchronously on mount; wait for it before routing.
+  const [ready, setReady] = useState(!DEMO_MODE);
+
+  const saveSession = useCallback((nextUser: User, nextToken: string) => {
+    setUser(nextUser);
+    setToken(nextToken);
+    localStorage.setItem('tc_user', JSON.stringify(nextUser));
+    localStorage.setItem('tc_token', nextToken);
+  }, []);
+
+  useEffect(() => {
+    if (!DEMO_MODE) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch(`${API}/api/auth/demo`, { method: 'POST' });
+        if (!res.ok) throw new Error('Demo sign-in failed');
+        const data = await res.json();
+        if (!cancelled) saveSession(data.user, data.token);
+      } catch (err) {
+        console.error('Demo sign-in failed:', err);
+        if (!cancelled) {
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem('tc_user');
+          localStorage.removeItem('tc_token');
+        }
+      } finally {
+        if (!cancelled) setReady(true);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [saveSession]);
 
   const login = useCallback(async (username: string, password: string) => {
     const res = await fetch(`${API}/api/auth/login`, {
@@ -31,11 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(err.error ?? 'Login failed');
     }
     const data = await res.json();
-    setUser(data.user);
-    setToken(data.token);
-    localStorage.setItem('tc_user', JSON.stringify(data.user));
-    localStorage.setItem('tc_token', data.token);
-  }, []);
+    saveSession(data.user, data.token);
+  }, [saveSession]);
 
   const register = useCallback(async (username: string, password: string) => {
     const res = await fetch(`${API}/api/auth/register`, {
@@ -58,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, token }}>
+    <AuthContext.Provider value={{ user, login, register, logout, token, ready, isDemo: DEMO_MODE }}>
       {children}
     </AuthContext.Provider>
   );

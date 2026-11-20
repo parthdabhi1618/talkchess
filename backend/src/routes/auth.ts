@@ -30,6 +30,23 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/auth/demo — sign in as the shared demo user (no credentials needed)
+router.post('/demo', async (_req: Request, res: Response) => {
+  try {
+    const user = await prisma.user.upsert({
+      where: { username: 'demo' },
+      update: {},
+      create: { username: 'demo', passwordHash: hashPassword('talkchess-demo') },
+      select: { id: true, username: true },
+    });
+
+    const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
+    res.json({ user: { id: user.id, username: user.username }, token });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/auth/login
 router.post('/login', async (req: Request, res: Response) => {
   try {

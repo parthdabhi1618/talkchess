@@ -60,6 +60,18 @@ npm run dev
 
 The Vite dev server proxies `/api` and `/ws` to the backend on port 3001.
 
+## Demo mode
+
+Demo mode is **on by default**. Opening the app signs you in as a shared `demo` user and drops you straight into a game against Stockfish — no login screen and no credentials needed. The sign-out controls are hidden during a demo session.
+
+To restore the normal login flow, create `frontend/.env` with:
+
+```env
+VITE_DEMO_MODE=false
+```
+
+The backend supports this via `POST /api/auth/demo`, which creates (or reuses) the demo user and returns a session token.
+
 ## Configuration
 
 Backend settings live in `backend/.env`:
